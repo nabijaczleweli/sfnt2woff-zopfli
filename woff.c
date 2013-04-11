@@ -130,6 +130,7 @@ woffEncode(const uint8_t * sfntData, uint32_t sfntLen,
            uint32_t * pStatus)
 {
   uint8_t * woffData = NULL;
+  uint8_t * woffDataNew = NULL;
   tableOrderRec * tableOrder = NULL;
 
   uint32_t tableOffset;
@@ -140,7 +141,6 @@ woffEncode(const uint8_t * sfntData, uint32_t sfntLen,
   uint16_t tableIndex;
   uint16_t order;
   const sfntDirEntry * sfntDir;
-  uint32_t tableBase;
   uint32_t checkSumAdjustment = 0;
   woffHeader * newHeader;
   uint32_t tag = 0;
@@ -318,9 +318,11 @@ woffEncode(const uint8_t * sfntData, uint32_t sfntLen,
       if (tableOffset + LONGALIGN(sourceLen) < tableOffset) {
         FAIL(eWOFF_invalid); /* overflow, bail out */
       }
-      woffData = (uint8_t *) realloc(woffData,
-                                     tableOffset + LONGALIGN(sourceLen));
-      if (!woffData) {
+      woffDataNew = (uint8_t *) realloc(woffData,
+                                        tableOffset + LONGALIGN(sourceLen));
+      if (woffDataNew) {
+        woffData = woffDataNew;
+      } else {
         FAIL(eWOFF_out_of_memory);
       }
       /* copy the original data into place */
@@ -435,7 +437,6 @@ rebuildWoff(const uint8_t * woffData, uint32_t * woffLen,
   const woffHeader * origHeader;
   const woffDirEntry * woffDir;
   uint8_t * newData = NULL;
-  uint8_t * tableData = NULL;
   woffHeader * newHeader;
   uint16_t numTables;
   uint32_t tableLimit, totalSize, offset;

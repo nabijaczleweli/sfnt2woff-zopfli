@@ -177,6 +177,8 @@ woffEncode(const uint8_t * sfntData, uint32_t sfntLen,
       }
       head = (const sfntHeadTable *)(sfntData +
                                      READ32BE(sfntDir[tableIndex].offset));
+      if ((uint8_t *)(head + 1) >= sfntData + sfntLen)
+       FAIL(eWOFF_invalid);
     }
   }
   if (!head) {
@@ -752,7 +754,7 @@ woffDecodeToBufferInternal(const uint8_t * woffData, uint32_t woffLen,
   newHeader = (sfntHeader *) (sfntData);
   newHeader->version = header->flavor;
   newHeader->numTables = READ16BE(numTables);
-  
+
   /* calculate header fields for binary search */
   searchRange = numTables;
   searchRange |= (searchRange >> 1);
@@ -1015,7 +1017,7 @@ failure:
   if (pStatus) {
     *pStatus = status;
   }
-  return NULL;    
+  return NULL;
 }
 
 const uint8_t *
@@ -1070,7 +1072,7 @@ failure:
   if (pStatus) {
     *pStatus = status;
   }
-  return NULL;    
+  return NULL;
 }
 
 void
